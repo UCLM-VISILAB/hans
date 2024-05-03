@@ -3,7 +3,7 @@ This is the source code for the HANS platform.
 ## Deployment
 To deploy it, you need to install `docker`.
 
-First, create a file with the name `.env` placed next to the file `docker-compose.yml`. This file defines the following env variables
+First, create a file with the name `.env` placed next to the file `compose.yml`. This file defines the following env variables
 
 ```
 HOST=<this machines IP or domain name>
