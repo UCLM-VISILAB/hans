@@ -8,7 +8,7 @@ ENV REACT_APP_API_ORIGIN=${API_ORIGIN}
 ENV REACT_APP_WS_MQTT=${WS_MQTT}
 
 COPY . /app
-RUN cd /app && npm run build
+RUN cd /app && npm ci && npm run build
 
 FROM nginx
 COPY --from=build-react-app /app/build /www
