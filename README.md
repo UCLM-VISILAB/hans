@@ -7,7 +7,7 @@ First, create a file with the name `.env` placed next to the file `compose.yml`.
 
 ```
 HOST=<this machines IP or domain name>
-API_PORT=
+NGINX_PORT=
 MQTT_PORT=
 
 AWS_ACCESS_KEY_ID=
@@ -16,8 +16,6 @@ AWS_SECRET_ACCESS_KEY=
 
 You need to set a value for the variables `HOST`, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. The last two variables are not necessary if you are running the application on a EC2 instance with a IAM role. If `API_PORT` or `MQTT_PORT` are not given value, they default to 80 and 9001, respectively.
 
-In case you change `API_PORT`, change it also in the file `nginx.conf`, in
-the `proxy_pass` directive. This inconvenience will be solve in a future version.
 
 Then, run the following command
 ```bash
