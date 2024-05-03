@@ -29,8 +29,8 @@ services:
       context: ./backend
     environment:
       # TODO: Env variables are not the best way to pass secrets
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
     volumes:
       - ./logs/:/app/session_log/
     restart: unless-stopped
