@@ -7,8 +7,13 @@ ARG WS_MQTT
 ENV REACT_APP_API_ORIGIN=${API_ORIGIN}
 ENV REACT_APP_WS_MQTT=${WS_MQTT}
 
-COPY . /app
-RUN cd /app && npm ci && npm run build
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci && npm cache clean --force
+COPY public/ ./public
+COPY src/ ./src
+RUN npm run build
 
 FROM nginx
 COPY --from=build-react-app /app/build /www
