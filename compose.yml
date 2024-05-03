@@ -1,0 +1,36 @@
+name: hans-platform
+
+services:
+  web:
+    build:
+      context: ./frontend
+      args:
+        - API_ORIGIN=http://${HOST}:${API_PORT:-80}
+        - WS_MQTT=ws://${HOST}:${MQTT_PORT:-9001}
+    ports:
+      - 8080:80
+    volumes:
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/nginx.conf
+    restart: unless-stopped
+
+  mosquitto:
+    build:
+      context: ./backend
+      dockerfile: mosquitto.Dockerfile
+    ports:
+      # TODO: find a reliable way to proxy websockets through nginx
+      - ${MQTT_PORT:-9001}:9001
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+    environment:
+      # TODO: Env variables are not the best way to pass secrets
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ./logs/:/app/session_log/
+    restart: unless-stopped
