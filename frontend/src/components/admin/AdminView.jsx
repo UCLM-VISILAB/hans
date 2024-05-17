@@ -45,7 +45,7 @@ export default function AdminView() {
     }
     // Función para realizar una solicitud POST
     async function fetchSessionData() {
-        const response = await fetch(`${process.env.REACT_APP_API_ORIGIN}/api/session`, {
+        const response = await fetch(`${process.env.REACT_APP_API_ORIGIN}/session`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -67,7 +67,7 @@ export default function AdminView() {
 
     // Función para realizar una solicitud GET
     async function fetchCollectionData() {
-        const response = await fetch(`${process.env.REACT_APP_API_ORIGIN}/api/collection`, {
+        const response = await fetch(`${process.env.REACT_APP_API_ORIGIN}/collection`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

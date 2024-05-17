@@ -52,7 +52,7 @@ export default function AdminInterface({ username, password, collections, sessio
             id: questionData.id,
             prompt: questionData.prompt,
             answers: questionData.answers,
-            image: `${process.env.REACT_APP_API_ORIGIN}/api/question/${Object.keys(collections)[0]}/${questionData.id}/image`,
+            image: `${process.env.REACT_APP_API_ORIGIN}/question/${Object.keys(collections)[0]}/${questionData.id}/image`,
           });
           currentSession.current.publishControl({
             type: 'setup',
@@ -69,7 +69,7 @@ export default function AdminInterface({ username, password, collections, sessio
 
   const getParticipantsBySession = useCallback(() => {
     fetch(
-      `${process.env.REACT_APP_API_ORIGIN}/api/session/${selectedSession.id}/allParticipants`,
+      `${process.env.REACT_APP_API_ORIGIN}/session/${selectedSession.id}/allParticipants`,
       {
         method: 'POST',
         headers: {
@@ -200,7 +200,7 @@ export default function AdminInterface({ username, password, collections, sessio
   }, [shouldPublishCentralPosition, currentSession]);
 
   function fetchQuestion(collectionId, questionId) {
-    return fetch(`${process.env.REACT_APP_API_ORIGIN}/api/question/${collectionId}/${questionId}`, {
+    return fetch(`${process.env.REACT_APP_API_ORIGIN}/question/${collectionId}/${questionId}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -222,7 +222,7 @@ export default function AdminInterface({ username, password, collections, sessio
           id: questionId,
           prompt: data.question,
           answers: data.answers,
-          image: `${process.env.REACT_APP_API_ORIGIN}/api/question/${collectionId}/${questionId}/image`,
+          image: `${process.env.REACT_APP_API_ORIGIN}/question/${collectionId}/${questionId}/image`,
         };
       });
   }
@@ -263,7 +263,7 @@ export default function AdminInterface({ username, password, collections, sessio
           id: questionData.id,
           prompt: questionData.prompt,
           answers: questionData.answers,
-          image: `${process.env.REACT_APP_API_ORIGIN}/api/question/${event.target.value}/${questionData.id}/image`,
+          image: `${process.env.REACT_APP_API_ORIGIN}/question/${event.target.value}/${questionData.id}/image`,
         });
         currentSession.current.publishControl({
           type: 'setup',
@@ -316,7 +316,7 @@ export default function AdminInterface({ username, password, collections, sessio
   };
   const createSession = (event) => {
     fetch(
-      `${process.env.REACT_APP_API_ORIGIN}/api/createSession`,
+      `${process.env.REACT_APP_API_ORIGIN}/createSession`,
       {
         method: 'POST',
         headers: {
@@ -353,7 +353,7 @@ export default function AdminInterface({ username, password, collections, sessio
   };
   const fetchlogs = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_ORIGIN}/api/listLogs`);
+      const response = await fetch(`${process.env.REACT_APP_API_ORIGIN}/listLogs`);
       const data = await response.json();
       setLogs(data.logs.filter(item => item !== "zips").sort(compareDates));
 
@@ -367,7 +367,7 @@ export default function AdminInterface({ username, password, collections, sessio
   };
   const downloadFolder = () => {
     let folderPath = selectedLog
-    fetch(`${process.env.REACT_APP_API_ORIGIN}/api/downloadLog/${folderPath}`)
+    fetch(`${process.env.REACT_APP_API_ORIGIN}/downloadLog/${folderPath}`)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
@@ -386,7 +386,7 @@ export default function AdminInterface({ username, password, collections, sessio
     let folderPath = logs[logs.length - 1];
     setSelectedLog(folderPath);
     await new Promise((resolve) => setTimeout(resolve, 0)); // Esperar un ciclo de eventos para que setSelectedLog termine de actualizar
-    fetch(`${process.env.REACT_APP_API_ORIGIN}/api/downloadLog/${logs[logs.length - 1]}`)
+    fetch(`${process.env.REACT_APP_API_ORIGIN}/downloadLog/${logs[logs.length - 1]}`)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
@@ -402,7 +402,7 @@ export default function AdminInterface({ username, password, collections, sessio
       });
   };
   const downloadAllLogs = () => {
-    fetch(`${process.env.REACT_APP_API_ORIGIN}/api/downloadAllLogs`)
+    fetch(`${process.env.REACT_APP_API_ORIGIN}/downloadAllLogs`)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
@@ -418,7 +418,7 @@ export default function AdminInterface({ username, password, collections, sessio
       });
   };
   const downloadAllTrajectories = () => {
-    fetch(`${process.env.REACT_APP_API_ORIGIN}/api/downloadAllTrajectories`)
+    fetch(`${process.env.REACT_APP_API_ORIGIN}/downloadAllTrajectories`)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
@@ -439,7 +439,7 @@ export default function AdminInterface({ username, password, collections, sessio
   
     // If the user confirms, proceed with the deletion
     if (userConfirmed) {
-      fetch(`${process.env.REACT_APP_API_ORIGIN}/api/deleteAllTrajectories`)
+      fetch(`${process.env.REACT_APP_API_ORIGIN}/deleteAllTrajectories`)
         .then(res => {
           if (res.status === 200) {
             alert("All trajectories have been successfully deleted.");
@@ -462,7 +462,7 @@ export default function AdminInterface({ username, password, collections, sessio
     // If the user confirms, proceed with the deletion
     if (userConfirmed) {
       if(userConfirmed2){
-        fetch(`${process.env.REACT_APP_API_ORIGIN}/api/deleteAllLogs`)
+        fetch(`${process.env.REACT_APP_API_ORIGIN}/deleteAllLogs`)
         .then(res => {
           if (res.status === 200) {
             alert("All logs have been successfully deleted.");

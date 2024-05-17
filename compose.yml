@@ -5,8 +5,8 @@ services:
     build:
       context: ./frontend
       args:
-        - API_ORIGIN=http://${HOST}:${NGINX_PORT:-80}
-        - WS_MQTT=ws://${HOST}:${MQTT_PORT:-9001}
+        - API_ORIGIN=${API_BASE}
+        - WS_MQTT=${WS_MQTT}
     ports:
       - ${NGINX_PORT:-80}:80
     volumes:

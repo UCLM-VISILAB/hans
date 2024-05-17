@@ -25,7 +25,7 @@ export default function AdminLogin({ username = null, password=null, status=null
     //Saca error si el id de la sesión no es numérico
 
     await fetch(
-      `${process.env.REACT_APP_API_ORIGIN}/api/admin/login`,
+      `${process.env.REACT_APP_API_ORIGIN}/admin/login`,
       {
         method: 'POST',
         headers: {

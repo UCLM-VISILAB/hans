@@ -126,7 +126,7 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
 
   function fetchSessionData(sessionId) {
     fetch(
-      `${process.env.REACT_APP_API_ORIGIN}/api/session/${sessionId}`,
+      `${process.env.REACT_APP_API_ORIGIN}/session/${sessionId}`,
       {
         method: 'GET',
         headers: {
@@ -157,7 +157,7 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
     let ignore = false;
     if (question.collection && question.id) {
       fetch(
-        `${process.env.REACT_APP_API_ORIGIN}/api/question/${question.collection}/${question.id}`,
+        `${process.env.REACT_APP_API_ORIGIN}/question/${question.collection}/${question.id}`,
         {
           method: 'GET',
           headers: {
@@ -174,7 +174,7 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
                 id: questionId,
                 prompt: data.question,
                 answers: data.answers,
-                image: `${process.env.REACT_APP_API_ORIGIN}/api/question/${question.collection}/${questionId}/image`,
+                image: `${process.env.REACT_APP_API_ORIGIN}/question/${question.collection}/${questionId}/image`,
               });
               setTimeout(() => {
                 sessionRef.current.publishControl({ type: 'ready', participant: participantId, session: sessionId });
@@ -226,7 +226,7 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
 
   const onLeaveSessionClick = () => {
     fetch(
-      `${process.env.REACT_APP_API_ORIGIN}/api/session/${sessionId}/participants/${participantId}`,
+      `${process.env.REACT_APP_API_ORIGIN}/session/${sessionId}/participants/${participantId}`,
       {
         method: 'POST',
         headers: {

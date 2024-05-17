@@ -28,7 +28,7 @@ export default function SessionLogin({ username = null, onJoinSession=()=>{} }) 
     }
 
     await fetch(
-      `${process.env.REACT_APP_API_ORIGIN}/api/session/${sessionId}/participants`,
+      `${process.env.REACT_APP_API_ORIGIN}/session/${sessionId}/participants`,
       {
         method: 'POST',
         headers: {
