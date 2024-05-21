@@ -5,6 +5,19 @@ import { Session, SessionStatus } from '../../context/Session';
 import CountDown from '../session/Countdown';
 import BoardView from '../BoardView';
 import QuestionDetails from '../session/QuestionDetails';
+import useTimeout from "../../hooks/useTimeout";
+
+function getNextQuestion(questions, questionId) {
+  const index = questions.indexOf(questionId);
+  if (index === -1) {
+    throw new Error(`Could not find ${questionId} in the array of questions`)
+  }
+
+  if (index + 1 === questions.length) {
+    return null;
+  }
+  return questions[index + 1];
+}
 
 export default function AdminInterface({ username, password, collections, sessions, onSessionCreated }) {
   const [selectedSession, setSelectedSession] = useState({ id: 0, duration: 0, collection_id: "", question_id: "", status: "" });
@@ -24,6 +37,12 @@ export default function AdminInterface({ username, password, collections, sessio
   const targetDate = useRef('2023-04-01T00:00:00Z');
   const [shouldPublishCentralPosition, setShouldPublishCentralPosition] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  const [isAutomatic, setIsAutomatic] = useState(false);
+
+  // All of this could be simplified async and await syntax
+  const automaticStartTimeout = useTimeout(() => startSession());
+  const automaticChangeQuestion = useTimeout(() => changeToNextQuestion());
 
   useEffect(() => {
     if (sessions && sessions.length > 0) {
@@ -169,18 +188,18 @@ export default function AdminInterface({ username, password, collections, sessio
     // Create an array of all valid participant positions
     const validPositions = Object.values(usersMagnetPositions.current)
       .filter((position) => position.position.length === activeQuestion.answers.length);
-  
+
     if (validPositions.length > 0) {
       // Initialize an array to store the sum of positions
       const sumPositions = Array(validPositions[0].position.length).fill(0);
-  
+
       // Calculate the sum of positions
       validPositions.forEach((participantPosition) => {
         for (let i = 0; i < participantPosition.position.length; i++) {
           sumPositions[i] += participantPosition.position[i];
         }
       });
-  
+
       // Calculate the central cue position by averaging the sum of positions
       const centralCue = sumPositions.map((sum) => sum / validPositions.length);
       setCentralCuePosition(centralCue);
@@ -193,7 +212,7 @@ export default function AdminInterface({ username, password, collections, sessio
       currentSession.current.publishUpdate({ data: { position: centralCuePosition, timeStamp: new Date().toISOString() } });
       setShouldPublishCentralPosition(false);
       setTimeout(() => {
-        currentSession.current.publishControl({ type: 'stop', mode: isChecked?'trajectories':'normal' });
+        currentSession.current.publishControl({ type: 'stop', mode: isChecked ? 'trajectories' : 'normal' });
       }, 100);
     }
     // eslint-disable-next-line
@@ -234,40 +253,46 @@ export default function AdminInterface({ username, password, collections, sessio
       return participant; // mantener el estado si no es "ready"
     }));
   }
-  const handleQuestionChange = (event) => {
+
+  const changeQuestion = (questionId) => {
     usersMagnetPositions.current = [];
     setPeerMagnetPositions([]);
-    setSelectedSession({ ...selectedSession, question_id: event.target.value });
+    setSelectedSession({ ...selectedSession, question_id: questionId});
     setStatusJoinParticipants();
-    fetchQuestion(selectedSession.collection_id, event.target.value)
+    fetchQuestion(selectedSession.collection_id, questionId)
       .then(questionData => {
         setActiveQuestion(questionData);
         currentSession.current.publishControl({
           type: 'setup',
           collection_id: selectedSession.collection_id,
-          question_id: questionData.id,
+          question_id: questionId
         });
       })
       .catch(error => {
         console.log(error);
       });
-  }
-  const handleCollectionChange = (event) => {
+  };
+
+  const changeCollection = (collectionId) => {
     usersMagnetPositions.current = [];
     setPeerMagnetPositions([]);
-    setSelectedSession({ ...selectedSession, collection_id: event.target.value, question_id: collections[event.target.value][0] });
+    setSelectedSession({
+      ...selectedSession,
+      collection_id: collectionId,
+      question_id: collections[collectionId][0]
+    });
     setStatusJoinParticipants();
-    fetchQuestion(event.target.value, collections[event.target.value][0])
+    fetchQuestion(collectionId, collections[collectionId][0])
       .then(questionData => {
         setActiveQuestion({
           id: questionData.id,
           prompt: questionData.prompt,
           answers: questionData.answers,
-          image: `${process.env.REACT_APP_API_ORIGIN}/question/${event.target.value}/${questionData.id}/image`,
+          image: `${process.env.REACT_APP_API_ORIGIN}/question/${collectionId}/${questionData.id}/image`,
         });
         currentSession.current.publishControl({
           type: 'setup',
-          collection_id: event.target.value,
+          collection_id: collectionId,
           question_id: questionData.id,
         });
       })
@@ -284,7 +309,7 @@ export default function AdminInterface({ username, password, collections, sessio
     session.duration = selectedSession.duration;
     setSelectedSession(session);
   }
-  const startSession = (event) => {
+  const startSession = () => {
     if (!waitingCountDown) {
       sessionStatus.current = SessionStatus.Active;
       usersMagnetPositions.current = [];
@@ -298,6 +323,16 @@ export default function AdminInterface({ username, password, collections, sessio
     waitOrCloseSession();
   }
 
+  const changeToNextQuestion = () => {
+    const questions = collections[selectedSession.collection_id];
+    const nextQuestionId = getNextQuestion(questions, selectedSession.question_id);
+    if (nextQuestionId == null) {
+      return;
+    }
+    changeQuestion(nextQuestionId);
+    automaticStartTimeout.trigger(3000);
+  };
+
   const waitOrCloseSession = () => {
     if (!waitingCountDown) {
       setWaitingCountDown(true);
@@ -305,9 +340,15 @@ export default function AdminInterface({ username, password, collections, sessio
         setShouldPublishCentralPosition(true); // Marcar que se debe publicar la posición central
         setWaitingCountDown(false);
         sessionStatus.current = SessionStatus.Waiting;
+
+        if (isAutomatic) {
+          automaticChangeQuestion.trigger(3000);
+        }
+
       }, selectedSession.duration * 1000);
     } else {
       clearTimeout(timerId.current);
+      automaticStartTimeout.cancel();
       setShouldPublishCentralPosition(true); // Marcar que se debe publicar la posición central
       setWaitingCountDown(false);
       setTargetDateCountdown(Date.now());
@@ -436,7 +477,7 @@ export default function AdminInterface({ username, password, collections, sessio
   const deleteTrajectories = (event) => {
     // Ask the user for confirmation before proceeding
     const userConfirmed = window.confirm("Are you sure you want to delete all trajectories?");
-  
+
     // If the user confirms, proceed with the deletion
     if (userConfirmed) {
       fetch(`${process.env.REACT_APP_API_ORIGIN}/deleteAllTrajectories`)
@@ -461,19 +502,19 @@ export default function AdminInterface({ username, password, collections, sessio
     const userConfirmed2 = window.confirm("Are you really sure you want to delete all logs?");
     // If the user confirms, proceed with the deletion
     if (userConfirmed) {
-      if(userConfirmed2){
+      if (userConfirmed2) {
         fetch(`${process.env.REACT_APP_API_ORIGIN}/deleteAllLogs`)
-        .then(res => {
-          if (res.status === 200) {
-            alert("All logs have been successfully deleted.");
-          } else {
-            res.text().then(msg => console.log(msg));
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-      }else {
+          .then(res => {
+            if (res.status === 200) {
+              alert("All logs have been successfully deleted.");
+            } else {
+              res.text().then(msg => console.log(msg));
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      } else {
         // If the user cancels, you can take some action or simply exit the function
         console.log("Deletion operation canceled by the user.");
       }
@@ -485,6 +526,12 @@ export default function AdminInterface({ username, password, collections, sessio
   const handleCheckboxChange = () => {
     // Cambia el estado al valor opuesto cuando el checkbox se marca/desmarca
     setIsChecked(!isChecked);
+  };
+
+  const handleAutomaticCheckboxChange = () => {
+    setIsAutomatic(!isAutomatic);
+    automaticChangeQuestion.cancel();
+    automaticStartTimeout.cancel();
   };
 
   return (
@@ -505,7 +552,11 @@ export default function AdminInterface({ username, password, collections, sessio
           <label>Duration:</label>
           <input type="text" value={selectedSession ? selectedSession.duration : ""} onChange={e => setSelectedSession({ ...selectedSession, duration: e.target.value })} />
           <label>Collection:</label>
-          <select onChange={handleCollectionChange} disabled={waitingCountDown} value={selectedSession.collection_id}>
+          <select
+            onChange={(e) => changeCollection(e.target.value)}
+            disabled={waitingCountDown || isAutomatic}
+            value={selectedSession.collection_id}
+          >
             {collections && Object.keys(collections).map(collectionKey => (
               <option key={collectionKey} value={collectionKey}>
                 {collectionKey}
@@ -513,7 +564,11 @@ export default function AdminInterface({ username, password, collections, sessio
             ))}
           </select>
           <label>Question:</label>
-          <select onChange={handleQuestionChange} disabled={waitingCountDown} value={selectedSession.question_id}>
+          <select
+            onChange={(e) => changeQuestion(e.target.value)}
+            disabled={waitingCountDown || isAutomatic}
+            value={selectedSession.question_id}
+          >
             {collections?.[selectedSession.collection_id]?.map(collectionQuestion => (
               <option key={collectionQuestion} value={collectionQuestion}>
                 {collectionQuestion}
@@ -524,6 +579,14 @@ export default function AdminInterface({ username, password, collections, sessio
 
         <div className="startsession">
           <button onClick={startSession}>{waitingCountDown ? "Stop" : "Start"}</button>
+          <label>
+            <input
+              type="checkbox"
+              checked={isAutomatic}
+              onChange={handleAutomaticCheckboxChange}
+            />
+            Automatic Mode
+          </label>
           <label>Ready: {participantList ? participantList.filter(participant => participant.status === 'ready').length : 0}/{participantList ? participantList.length : 0}</label>
           <textarea className="inputParticipant" readOnly value={participantList ? participantList.map(p => `${p.id}.-${p.username} -> ${p.status}`).join("\n") : "Sin participantes todavía"} />
         </div>
@@ -565,7 +628,7 @@ export default function AdminInterface({ username, password, collections, sessio
               Save trajectories
             </label>
 
-            <p>{isChecked?"Trajectories mode":"Normal mode"}</p>
+            <p>{isChecked ? "Trajectories mode" : "Normal mode"}</p>
           </div>
         </div>
       </div>
