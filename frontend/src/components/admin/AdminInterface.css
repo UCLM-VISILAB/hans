@@ -91,8 +91,12 @@
     border-radius: 5px;
   }
   
-  .admin-interface  button:hover {
+  .admin-interface  button:hover:enabled {
     background-color: #3e8e41;
+  }
+
+  button:disabled {
+    background-color: #b5b4b4;
   }
   
   .admin-interface  label {

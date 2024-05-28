@@ -38,6 +38,8 @@ export default function AdminInterface({ username, password, collections, sessio
   const [shouldPublishCentralPosition, setShouldPublishCentralPosition] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
+  const [secondsBeforeStart, setSecondsBeforeStart] = useState(6);
+
   const [isAutomatic, setIsAutomatic] = useState(false);
 
   // All of this could be simplified async and await syntax
@@ -257,7 +259,7 @@ export default function AdminInterface({ username, password, collections, sessio
   const changeQuestion = (questionId) => {
     usersMagnetPositions.current = [];
     setPeerMagnetPositions([]);
-    setSelectedSession({ ...selectedSession, question_id: questionId});
+    setSelectedSession({ ...selectedSession, question_id: questionId });
     setStatusJoinParticipants();
     fetchQuestion(selectedSession.collection_id, questionId)
       .then(questionData => {
@@ -330,7 +332,7 @@ export default function AdminInterface({ username, password, collections, sessio
       return;
     }
     changeQuestion(nextQuestionId);
-    automaticStartTimeout.trigger(3000);
+    automaticStartTimeout.trigger(parseFloat(secondsBeforeStart) * 1000);
   };
 
   const waitOrCloseSession = () => {
@@ -534,6 +536,18 @@ export default function AdminInterface({ username, password, collections, sessio
     automaticStartTimeout.cancel();
   };
 
+  const handleSecondsChange = (value) => {
+    const parsedValue = parseFloat(value);
+
+    if (value !== "" && Number.isNaN(parsedValue)) {
+      return;
+    }
+
+    setSecondsBeforeStart(value === "" ? value : parsedValue.toString());
+    automaticChangeQuestion.cancel();
+    automaticStartTimeout.cancel();
+  };
+
   return (
     <div className="admin-interface">
       <div className="left-column">
@@ -578,7 +592,13 @@ export default function AdminInterface({ username, password, collections, sessio
         </div>
 
         <div className="startsession">
-          <button onClick={startSession}>{waitingCountDown ? "Stop" : "Start"}</button>
+          <button
+            onClick={startSession}
+            disabled={secondsBeforeStart === ""}
+          >
+            {waitingCountDown ? "Stop" : "Start"}
+          </button>
+          <label>Ready: {participantList ? participantList.filter(participant => participant.status === 'ready').length : 0}/{participantList ? participantList.length : 0}</label>
           <label>
             <input
               type="checkbox"
@@ -587,7 +607,23 @@ export default function AdminInterface({ username, password, collections, sessio
             />
             Automatic Mode
           </label>
-          <label>Ready: {participantList ? participantList.filter(participant => participant.status === 'ready').length : 0}/{participantList ? participantList.length : 0}</label>
+          {isAutomatic && <div style={{
+            display: "flex",
+            alignItems: "center"
+          }}>
+            <label>Wait seconds: </label>
+            <input
+              type="text"
+              style={{
+                flex: "1",
+                textAlign: "end"
+              }}
+              value={secondsBeforeStart}
+              onChange={(e) => handleSecondsChange(e.target.value)}
+              disabled={waitingCountDown}
+            >
+            </input>
+          </div>}
           <textarea className="inputParticipant" readOnly value={participantList ? participantList.map(p => `${p.id}.-${p.username} -> ${p.status}`).join("\n") : "Sin participantes todavía"} />
         </div>
       </div>
