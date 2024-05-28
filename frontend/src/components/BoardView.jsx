@@ -135,6 +135,10 @@ export default function BoardView({
       {/* Asignamos los puntos a las respuestas */}
       {answersText.map((anchor, i) => (
         <text
+          style={{
+            "user-select": "none",
+            "-webkit-user-select": "none"
+          }}
           key={anchor.text}
           x={anchor.x}
           y={anchor.y}

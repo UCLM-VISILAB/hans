@@ -213,14 +213,14 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
     }
 
     const adjustedPosition = adjustPosition(position.norm);
-    setUserMagnetPosition({...position, norm: adjustedPosition});
+    setUserMagnetPosition({ ...position, norm: adjustedPosition });
     const tiempoTranscurrido = Date.now();
     const hoy = new Date(tiempoTranscurrido);
     sessionRef.current.publishUpdate({
       data: {
-          position: adjustedPosition,
-          timeStamp: hoy.toISOString()
-        }
+        position: adjustedPosition,
+        timeStamp: hoy.toISOString()
+      }
     });
   };
 
@@ -273,7 +273,15 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
               borderRadius: 2
             }}
           >
-            <Typography component="h1" variant="h4" textAlign='center'>
+            <Typography
+              component="h1"
+              variant="h4"
+              textAlign='center'
+              style={{
+                "-webkit-user-select": "none",
+                "user-select": "none"
+              }}
+            >
               {question.status === QuestionStatus.Loaded ? question.prompt : "Question not defined yet"}
             </Typography>
           </Paper>

@@ -55,7 +55,16 @@ export default function QuestionDetails({ image, prompt }) {
         height={imageSize.height}
         style={{ maxWidth: '100%', height: 'auto' }}
       />
-      <Typography component="h4" variant="h6" textAlign='center' style={{ fontSize }}>
+      <Typography
+        component="h4"
+        variant="h6"
+        textAlign='center'
+        style={{
+          fontSize,
+          "-webkit-user-select": "none",
+          "user-select": "none"
+        }}
+      >
         <b>{prompt}</b>
       </Typography>
     </Box>
