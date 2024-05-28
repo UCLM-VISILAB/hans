@@ -678,6 +678,7 @@ export default function AdminInterface({ username, password, collections, sessio
           )}
           userMagnetPosition={userMagnetPosition}
           onUserMagnetMove={null}
+          showId
         />
       </div>
     </div>

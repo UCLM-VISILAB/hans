@@ -6,6 +6,7 @@ export default function BoardView({
   peerMagnetPositions,
   userMagnetPosition,
   onUserMagnetMove,
+  showId=false,
   debugView = false,
 }) {
   const svg = useRef();
@@ -172,7 +173,8 @@ export default function BoardView({
                 height={magnetSize}
                 fill="#000000AA"
               />
-              <text
+              {/* This solution can be 'hacked' but the other alternative takes more time and involes the backend*/ }
+              {showId && <text
                 x={denormalizedPosition.x + magnetSize * 1.2}
                 y={denormalizedPosition.y}
                 fontSize="50"
@@ -181,7 +183,7 @@ export default function BoardView({
                 dominantBaseline="middle"
               >
                 {participant.id}
-              </text>
+              </text>}
             </g>
           );
         })}
