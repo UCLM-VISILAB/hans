@@ -113,7 +113,7 @@ export default function BoardView({
   const normalizedPosition = debugView ? normalizePosition(userMagnetPosition) : undefined;
 
   return (
-    <svg ref={svg} viewBox="-500 -500 1000 1000">
+    <svg ref={svg} viewBox="-500 -500 1000 1000" onContextMenu={(e) => e.preventDefault()}>
       <polygon
         points={answerPoints.map((p, i) => `${p.x},${p.y}`).join(" ")}
         stroke="blue"
