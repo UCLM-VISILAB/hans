@@ -344,7 +344,7 @@ export default function AdminInterface({ username, password, collections, sessio
         sessionStatus.current = SessionStatus.Waiting;
 
         if (isAutomatic) {
-          automaticChangeQuestion.trigger(3000);
+          automaticChangeQuestion.trigger(6000);
         }
 
       }, selectedSession.duration * 1000);
