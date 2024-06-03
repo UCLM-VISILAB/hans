@@ -292,7 +292,7 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
             minHeight: 0,
             gap: '10px',
             m: 1,
-            display: 'flex',
+            display: sessionStatus.current === SessionStatus.Active ? "flex": "none",
             alignItems: 'stretch',
           }}
         >
