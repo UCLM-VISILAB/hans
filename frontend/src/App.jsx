@@ -1,5 +1,5 @@
 import { React, useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import Header from './components/Header';
 import SessionLogin from './components/SessionLogin';
@@ -11,13 +11,15 @@ import AdminView from './components/admin/AdminView.jsx';
 // 1, lo cual es una muy buena suposición
 
 function App() {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const participantId = localStorage.getItem("participantId");
   const [sessionData, setSessionData] = useState({});
 
   useEffect(() => {
-    if (participantId === null) {
+    // TODO: there has to be a better way to do this
+    if (participantId === null || location.pathname === "/admin") {
       return;
     }
 
