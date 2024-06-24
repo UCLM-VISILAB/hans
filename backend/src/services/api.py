@@ -86,6 +86,24 @@ class ServerAPI(Thread):
                 return SESSION_NOT_FOUND, 404
             return jsonify([participant.as_dict for participant in session.participants.values()])
 
+        @self.app.route("/session/<int:session_id>/participants/<string:participant_id>/validate", methods=["POST"])
+        def validate_participant_id(session_id: int, participant_id: str):
+            participant_id = request.json.get("participantId")
+            if participant_id is None:
+                return INVALID_REQUEST, 400
+
+            session = AppContext.sessions.get(session_id, None)
+            if session is None:
+                return SESSION_NOT_FOUND, 404
+
+            participant = session.participants.get(participant_id)
+            participant.status = Participant.Status.JOINED
+
+            if participant is not None:
+                return participant.as_dict
+
+            return "Participant ID not found", 404
+
         # función que escucha la petición del componente sessionLogin
         @self.app.route('/session/<int:session_id>/participants', methods=['POST'])
         def api_session_add_participant(session_id: int):

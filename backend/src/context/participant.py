@@ -1,8 +1,7 @@
 from enum import Enum
-
+from uuid import uuid4
 
 class Participant():
-    last_id = 0
 
     class Status(Enum):
         JOINED = 'joined'
@@ -11,8 +10,7 @@ class Participant():
         OFFLINE = 'offline'
 
     def __init__(self, username):
-        Participant.last_id += 1
-        self.id = Participant.last_id
+        self.id = str(uuid4())
         self.username = username
         self._status = Participant.Status.JOINED
 

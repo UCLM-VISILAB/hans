@@ -182,7 +182,7 @@ export default function BoardView({
                 textAnchor="start"
                 dominantBaseline="middle"
               >
-                {participant.id}
+                {participant.id.substring(participant.id.length - 12)}
               </text>}
             </g>
           );

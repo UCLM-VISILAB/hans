@@ -624,7 +624,7 @@ export default function AdminInterface({ username, password, collections, sessio
             >
             </input>
           </div>}
-          <textarea className="inputParticipant" readOnly value={participantList ? participantList.map(p => `${p.id}.-${p.username} -> ${p.status}`).join("\n") : "Sin participantes todavía"} />
+          <textarea className="inputParticipant" readOnly value={participantList ? participantList.map(p => `${p.id.substring(p.id.length - 12)} - ${p.username} -> ${p.status}`).join("\n") : "Sin participantes todavía"} />
         </div>
       </div>
 
