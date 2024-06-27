@@ -121,8 +121,8 @@ class ServerAPI(Thread):
 
             return jsonify(participant.as_dict)
         # Para poner en offline el status a un participante
-        @self.app.route('/session/<int:session_id>/participants/<int:participant_id>', methods=['POST'])
-        def api_session_remove_participant(session_id: int, participant_id: int):
+        @self.app.route('/session/<int:session_id>/participants/<string:participant_id>', methods=['POST'])
+        def api_session_remove_participant(session_id: int, participant_id: str):
             session = AppContext.sessions.get(session_id, None)
             if session is None:
                 return SESSION_NOT_FOUND, 404

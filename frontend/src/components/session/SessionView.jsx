@@ -237,6 +237,7 @@ export default function SessionView({ sessionId, participantId, onLeave = () => 
     ).then(res => {
       if (res.status === 200) {
         sessionRef.current.publishControl({ type: 'leave', participant: participantId, session: sessionId });
+        localStorage.removeItem("participantId");
       }
     }).catch(error => {
     });
