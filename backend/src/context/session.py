@@ -25,7 +25,7 @@ class SessionCommunicator(MQTTClient):
 
         self.on_status_changed: Callable[[SessionCommunicator.Status], None] = None
         self.on_participant_ready: Callable[[str,int], None] = None
-        self.on_participant_leave: Callable[[int,int], None] = None
+        self.on_participant_leave: Callable[[str,int], None] = None
         self.on_session_start: Callable[[None]] = None
         self.on_session_stop: Callable[[None]] = None
         self.on_setup_question: Callable[[str,int]] = None
@@ -60,7 +60,7 @@ class SessionCommunicator(MQTTClient):
         self.subscribe(f"swarm/session/{self.session_id}/#", callback)
 
     def control_message_handler(self, client, obj, msg):
-        client_id = int(msg.topic.split('/')[-1])
+        client_id = msg.topic.split('/')[-1]
         payload = json.loads(msg.payload)
         session_id = int(msg.topic.split('/')[-3])
         msg_type = payload.get('type', '')
@@ -88,7 +88,7 @@ class SessionCommunicator(MQTTClient):
                     #       periodically so the server can determine if they have left without notifying
 
     def updates_message_handler(self, client, obj, msg):
-        client_id = int(msg.topic.split('/')[-1])
+        client_id = msg.topic.split('/')[-1]
         payload = json.loads(msg.payload)
         if self.on_participant_update:
             self.on_participant_update(client_id, payload.get('data', {}))
@@ -280,7 +280,7 @@ class Session():
             generate_zip()
             self.status = Session.Status.WAITING
 
-    def participant_update_handler(self, participant_id: int, data: dict):
+    def participant_update_handler(self, participant_id: str, data: dict):
         position_data = data.get('position', None)
         timestamp = data.get('timeStamp', None)
         if position_data and timestamp:
